@@ -1,0 +1,31 @@
+; =====================================================================
+;  uart.hex  --  test de l'UART simulee (fonctionnalite optionnelle)
+;
+;  Ecrit "OK" suivi d'un retour a la ligne sur l'UART (adresse 0x85).
+;  La console affiche la chaine recue en fin d'execution.
+;
+;     0x00         JMP 0x04
+;     0x02         RETI
+;     0x04         LDI R0, 0x4F     ; 'O'
+;     0x06         ST  R0, 0x85
+;     0x08         LDI R0, 0x4B     ; 'K'
+;     0x0A         ST  R0, 0x85
+;     0x0C         LDI R0, 0x0A     ; retour a la ligne
+;     0x0E         ST  R0, 0x85
+;     0x10         HALT
+;
+;  ATTENDU : UART = "OK\n"
+; =====================================================================
+
+@00
+50 04               ; JMP 0x04
+78                  ; RETI
+
+@04
+08 4F               ; LDI R0, 'O'
+18 85               ; ST  R0, 0x85
+08 4B               ; LDI R0, 'K'
+18 85               ; ST  R0, 0x85
+08 0A               ; LDI R0, 0x0A
+18 85               ; ST  R0, 0x85
+F8                  ; HALT

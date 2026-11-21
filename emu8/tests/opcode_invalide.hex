@@ -1,0 +1,6 @@
+; opcode invalide a 0x04 (0x88 ne correspond a aucune instruction)
+@00
+50 04
+78
+@04
+88

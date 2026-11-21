@@ -1,0 +1,41 @@
+; =====================================================================
+;  chenillard.hex  --  allume les 8 LED l'une apres l'autre, puis HALT
+;
+;  Programme ecrit A LA MAIN en hexadecimal, sans assembleur : il sert
+;  a tester l'emulateur de maniere totalement independante.
+;
+;  Source assembleur equivalente :
+;
+;     0x00        JMP 0x04        ; vecteur de reset
+;     0x02        RETI            ; vecteur d'interruption (inutilise)
+;     0x04 debut: LDI R0, 0x01
+;     0x06        LDI R7, 0x01    ; constante 1 pour les decrementations
+;     0x08 boucle:ST  R0, 0x80    ; ecriture sur les LED
+;     0x0A        CALL 0x11       ; temporisation
+;     0x0C        ADD R0, R0      ; decalage a gauche
+;     0x0E        JNZ 0x08        ; apres 8 tours R0 = 0 donc Z = 1
+;     0x10        HALT
+;     0x11 delai: LDI R1, 0x20
+;     0x13 d_bcl: SUB R1, R7
+;     0x15        JNZ 0x13
+;     0x17        RET
+; =====================================================================
+
+@00
+50 04               ; JMP 0x04
+78                  ; RETI
+
+@04
+08 01               ; LDI R0, 0x01
+0F 01               ; LDI R7, 0x01
+18 80               ; ST  R0, 0x80
+68 11               ; CALL 0x11
+28 00               ; ADD R0, R0
+60 08               ; JNZ 0x08
+F8                  ; HALT
+
+@11
+09 20               ; LDI R1, 0x20
+31 07               ; SUB R1, R7
+60 13               ; JNZ 0x13
+70                  ; RET

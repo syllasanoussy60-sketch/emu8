@@ -1,0 +1,6 @@
+; RET sans CALL : doit declencher une pile vide
+@00
+50 04
+78
+@04
+70

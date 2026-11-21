@@ -1,0 +1,6 @@
+; CALL recursif : doit declencher un debordement de pile
+@00
+50 04
+78
+@04
+68 04               ; CALL 0x04 (sur lui-meme)

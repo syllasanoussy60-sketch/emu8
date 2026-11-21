@@ -1,0 +1,77 @@
+; =====================================================================
+;  timer_it.hex  --  test des interruptions du timer
+;
+;  Le programme principal attend dans une boucle vide. C'est la routine
+;  d'interruption (ISR) qui incremente le compteur affiche sur les LED.
+;  Au bout de 5 interruptions, le programme s'arrete.
+;
+;  Ce test verifie au passage un point delicat : l'ISR execute un SUB,
+;  qui modifie les drapeaux. Comme le registre d'etat est empile a
+;  l'entree en interruption et restaure par RETI, le JZ du programme
+;  principal voit bien le resultat de SON propre CMP.
+;
+;  Source assembleur equivalente :
+;
+;     0x00         JMP 0x04         ; vecteur de reset
+;     0x02         JMP 0x20         ; vecteur d'interruption -> ISR
+;
+;     0x04 debut:  LDI R7, 0x01     ; constante 1
+;     0x06         LDI R6, 0x05     ; nombre d'interruptions attendues
+;     0x08         LDI R5, 0x00     ; constante 0 (pour les comparaisons)
+;     0x0A         LDI R0, 0x00     ; compteur affiche sur les LED
+;     0x0C         LDI R1, 0x20
+;     0x0E         ST  R1, 0x84     ; timer : periode = 32 cycles
+;     0x10         LDI R1, 0xFF
+;     0x12         ST  R1, 0x82     ; timer : valeur = 0xFF (deborde vite)
+;     0x14         LDI R1, 0x03     ; bit0 = marche, bit1 = IT armee
+;     0x16         ST  R1, 0x83     ; timer : controle
+;
+;     0x18 attend: CMP R6, R5       ; R6 est-il retombe a 0 ?
+;     0x1A         JZ  0x1F
+;     0x1C         NOP
+;     0x1D         JMP 0x18
+;     0x1F         HALT
+;
+;     0x20 isr:    ADD R0, R7       ; compteur = compteur + 1
+;     0x22         ST  R0, 0x80     ; affichage sur les LED
+;     0x24         SUB R6, R7       ; une interruption de moins a attendre
+;     0x26         LDI R1, 0xFF
+;     0x28         ST  R1, 0x82     ; rearme le timer pres du debordement
+;     0x2A         RETI
+;
+;  ATTENDU en fin d'execution :
+;     R0 = 0x05, R6 = 0x00, LED = 00000101, 5 interruptions prises.
+; =====================================================================
+
+@00
+50 04               ; JMP 0x04
+50 20               ; JMP 0x20   (vecteur d'interruption)
+
+@04
+0F 01               ; LDI R7, 0x01
+0E 05               ; LDI R6, 0x05
+0D 00               ; LDI R5, 0x00
+08 00               ; LDI R0, 0x00
+09 20               ; LDI R1, 0x20
+19 84               ; ST  R1, 0x84
+09 FF               ; LDI R1, 0xFF
+19 82               ; ST  R1, 0x82
+09 03               ; LDI R1, 0x03
+19 83               ; ST  R1, 0x83
+
+@18
+4E 05               ; CMP R6, R5
+58 1F               ; JZ  0x1F
+00                  ; NOP
+50 18               ; JMP 0x18
+
+@1F
+F8                  ; HALT
+
+@20
+28 07               ; ADD R0, R7
+18 80               ; ST  R0, 0x80
+36 07               ; SUB R6, R7
+09 FF               ; LDI R1, 0xFF
+19 82               ; ST  R1, 0x82
+78                  ; RETI

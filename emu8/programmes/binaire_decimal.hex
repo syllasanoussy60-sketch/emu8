@@ -1,0 +1,50 @@
+; =====================================================================
+;  binaire_decimal.hex  --  conversion binaire vers decimal
+;
+;  Lit les 8 interrupteurs (0x81), convertit la valeur en trois
+;  chiffres decimaux ranges en 0x90, 0x91 et 0x92, puis les emet en
+;  ASCII sur l'UART.
+;
+;  Il n'y a pas d'instruction de division : on divise par
+;  soustractions successives, comme sur un microcontroleur sans
+;  multiplieur materiel.
+;
+;  A ESSAYER : cocher les interrupteurs 1, 3, 5 et 7 (valeur 170),
+;  puis Executer. La memoire doit afficher  0090 | 01 07 00
+; =====================================================================
+
+
+@00
+50 04                ; JMP  debut
+78                   ; RETI
+
+@04
+10 81                ; debut:  LD   R0, ENTREE
+0F 01                ; LDI  R7, 0x01
+09 00                ; LDI  R1, 0x00
+0A 00                ; LDI  R2, 0x00
+0B 64                ; LDI  R3, 100
+48 03                ; cent:   CMP  R0, R3
+80 18                ; JC   fin_cent
+30 03                ; SUB  R0, R3
+29 07                ; ADD  R1, R7
+50 0E                ; JMP  cent
+19 90                ; ST   R1, CENTAINES
+0B 0A                ; LDI  R3, 10
+48 03                ; diz:    CMP  R0, R3
+80 26                ; JC   fin_diz
+30 03                ; SUB  R0, R3
+2A 07                ; ADD  R2, R7
+50 1C                ; JMP  diz
+1A 91                ; ST   R2, DIZAINES
+18 92                ; ST   R0, UNITES
+0C 30                ; LDI  R4, ASCII_0
+29 04                ; ADD  R1, R4
+19 85                ; ST   R1, UART
+2A 04                ; ADD  R2, R4
+1A 85                ; ST   R2, UART
+28 04                ; ADD  R0, R4
+18 85                ; ST   R0, UART
+0C 0A                ; LDI  R4, 0x0A
+1C 85                ; ST   R4, UART
+F8                   ; HALT
