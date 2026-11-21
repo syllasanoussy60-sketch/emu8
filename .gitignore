@@ -1,0 +1,27 @@
+# Visual Studio
+.vs/
+x64/
+x86/
+Debug/
+Release/
+*.user
+*.suo
+*.aps
+*.obj
+*.pch
+*.pdb
+*.ilk
+*.exe
+*.tlog
+*.log
+*.lastbuildstate
+*.recipe
+*.VC.db
+
+# CMake
+build/
+CMakeCache.txt
+CMakeFiles/
+
+# Sorties de l'assembleur
+*.bin
